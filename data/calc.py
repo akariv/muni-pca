@@ -72,6 +72,7 @@ for entity_id in ENTITIES.values():
     entity_supports = [x for x in SUPPORTS if x['entity_id'] == entity_id]
 
     buckets = {}
+    usage = []
     for support in entity_supports:
         code = support['budget_code']
         for prefix, bucket in SUPPORT_PREFIXES:
@@ -80,7 +81,15 @@ for entity_id in ENTITIES.values():
                 rec['paid'] += support['paid']
                 rec['approved'] += support['approved']
                 break
+        if support['approved'] > 0 and prefix and 'מענק' not in prefix:
+            if support['paid'] / support['approved'] > 1:
+                usage.append(1)
+            else:
+                usage.append(support['paid'] / support['approved'])
+
     buckets = [dict(name=k, **v) for k, v in buckets.items()]
+    # for b in buckets:
+    #     b['usage'] = b['paid'] / b['approved'] if b['approved'] > 0 else 0
     supports = sorted(buckets, key=lambda x: x['paid'], reverse=True)[:10]
 
     buckets = {}
@@ -88,13 +97,15 @@ for entity_id in ENTITIES.values():
         key = (support['supporting_ministry'], MANY_WS.sub(' ', support['support_title']))
         rec = buckets.setdefault(key, dict(paid=0, approved=0))
         rec['paid'] += support['paid']
-        rec['approved'] += support['approved'] 
+        rec['approved'] += support['approved']
     buckets = [dict(ministry=k[0], title=k[1], **v) for k, v in buckets.items()]
     top = sorted(buckets, key=lambda x: x['paid'], reverse=True)[:10]
+    usage = sum(usage) / len(usage) if usage else 0
 
     ENTITY_SUPPORTS[entity_id] = {
         'supports': supports,
-        'top': top
+        'top': top,
+        'usage': usage,
     }
 
 print(ENTITY_SUPPORTS['500287008'])
@@ -215,7 +226,7 @@ pivoted_df['דמוגרפיה - נוצרים (אחוז)'] = pivoted_df['דמוג�
 
 POP = pivoted_df['דמוגרפיה - אוכלוסייה (סה"כ)'] / 1000
 EXPENSE = pivoted_df['הוצאות בתקציב הרגיל - סה"כ הוצאות בתקציב רגיל (אלפי ש"ח)']
-AREA = pivoted_df['גיאוגרפיה - סך הכל שטח (קמ"ר)']
+AREA = pivoted_df['שימושי קרקע - סך הכל שטח שיפוט (שטח בקמ"ר)'].replace({np.nan: None})
 ARNONA_AREA = pivoted_df['הכנסות בתקציב הרגיל - חיוב ארנונה סך הכל (שטח באלפי מ"ר)']
 
 configuration = [
@@ -291,23 +302,6 @@ for col, source, norm in configuration:
     elif norm == 'AREA':
         new_df[col] = new_df[col] / AREA
 
-
-SIMILARITY_COLUMNS = [
-       'ריבוי אוכלוסיה',
-       'מרחק מתל אביב', 'צעירים מתחת לגיל 17',
-       'מבוגרים מעל גיל 65', 'קצב גידול האוכלוסיה', 
-       'עולים חדשים',
-       'צפיפות אוכלוסיה', 'מדד חברתי-כלכלי', 'הוצאה לנפש על חינוך',
-       'הוצאה לנפש על רווחה', 'הוצאה לנפש על תרבות',
-       'הכנסות ארנונה לא למגורים', 'הכנסות ארנונה למגורים',
-       'הכנסות מלוות איזון', 'השתתפות משרדי הממשלה', 'גירעון',
-       'שטח עסקים', 'זכאים לבגרות', 'ממוצע תלמידים לכיתה', 'סטודנטים',
-       'תלמידים למורה', 'תלמידים נושרים', 'פארקים',
-       'מקבלי דמי אבטלה', 'מקבלי הבטחת הכנסה', 'מרוויחי שכר מינימום',
-       'ילדים במשפחות עם 5+ ילדים', 'שכירים', 'עצמאים',
-       'שכר ממוצע', *voter_columns
-]
-
 DISSIMILARITY_COLUMNS = [
     'דירות שנבנו', 'דירות למגורים', 'מקרי סכרת לשנה', 'מקרי סרטן לשנה',
        'פטירות לשנה', 'אחוז פטירת תינוקות', 'לידות לשנה', 'שיעור פריון',
@@ -318,9 +312,9 @@ DISSIMILARITY_COLUMNS = [
        'צפיפות אוכלוסיה', 'מדד חברתי-כלכלי', 'הוצאה לנפש על חינוך',
        'הוצאה לנפש על רווחה', 'הוצאה לנפש על תרבות',
        'הכנסות ארנונה לא למגורים', 'הכנסות ארנונה למגורים',
-       'הכנסות מלוות איזון', 'השתתפות משרדי הממשלה', 'גירעון', 'שטח חקלאי',
+       'הכנסות מלוות איזון', 'השתתפות משרדי הממשלה', 'שטח חקלאי',
        'שטח עסקים', 'זכאים לבגרות', 'ממוצע תלמידים לכיתה', 'סטודנטים',
-       'תלמידים למורה', 'תלמידים נושרים', 'מורשעים', 'פארקים',
+       'תלמידים למורה', 'תלמידים נושרים', 'פארקים',
        'מקבלי דמי אבטלה', 'מקבלי הבטחת הכנסה', 'מרוויחי שכר מינימום',
        'אי שויון כלכלי', 'ילדים במשפחות עם 5+ ילדים', 'שכירים', 'עצמאים',
        'שכר ממוצע', *voter_columns
@@ -406,6 +400,11 @@ FILES = {
                 for col, orig_col, _ in configuration
                 if not np.isnan(pivoted_df.loc[city_name][orig_col])
             ),
+            orig=dict(
+                (col, pivoted_df.loc[city_name][col])
+                for col in pivoted_df.columns
+                if (not np.isreal(pivoted_df.loc[city_name][col]) or not np.isnan(pivoted_df.loc[city_name][col]))
+            ),
             supports=ENTITY_SUPPORTS.get(pivoted_df.loc[city_name]['entity_id'])
         )) for city_name in all_city_names
     ),
@@ -468,7 +467,7 @@ for city_name in all_city_names:
         FILES['distances'].setdefault(city_name, []).append([nearest_city, most_different_columns_actual])
 
 for k, v in FILES.items():
-    with open(f'{k}.json', 'w') as json_output:
+    with open(f'../src/assets/{k}.json', 'w') as json_output:
         json.dump(v, json_output, ensure_ascii=False, sort_keys=True)
 
 

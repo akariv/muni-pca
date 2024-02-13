@@ -1,0 +1,206 @@
+<section *ngIf='reveal() >= 0'>
+    <h1>תיכף בחירות!</h1>
+    <p><small>(לרשויות המקומיות, כן?)</small></p>
+    <p>אבל לא תמיד קל לדעת למי להצביע.</p> 
+    <p>לא פעם אנחנו שואלים את עצמנו ״איך העיר או המועצה שלי בהשוואה לאחרות?״</p> 
+    <p>בחמש הדקות הקרובות ננסה לשפוך אור על השאלה הזו.</p> 
+</section>
+
+<section *ngIf='reveal() >= 1'>
+    <p>כדי להתחיל, נבקש שתבחרו את ישוב המגורים שלכם:</p>
+    <mat-form-field class="example-full-width" [dir]='"rtl"'>
+        <mat-label>בחירת ישוב מגורים</mat-label>
+        <input type="text"
+               placeholder="בחרו אחד..."
+               aria-label="ישוב מגורים"
+               matInput
+               [formControl]="muniSelection"
+               [matAutocomplete]="auto">
+        <mat-autocomplete #auto="matAutocomplete" (optionSelected)='selected($event)'>
+          @for (option of filteredOptions | async; track option) {
+            <mat-option [value]="option">{{option}}</mat-option>
+          }
+        </mat-autocomplete>
+    </mat-form-field>
+</section>
+
+@if (muni()) {
+<section *ngIf='reveal() >= 2'>
+    <p>
+        @if (cityName() !== muniName()) {
+            בחרתם ב<em>{{cityName()}}</em> שהוא ישוב במועצה האזורית <em>{{muniName()}}</em>.
+            @if (muniNumCities()) {
+                יש בסה״כ {{muniNumCities()}} ישובים במועצה הזו.
+            }
+        } @else {
+            בחרתם ב<em>{{muniName()}}</em>.
+        }    
+    </p>
+    <p>
+        <em>{{muniName()}}</em> היא <em>{{muniType()}}</em> ב<em>{{muniDistrict()}}</em>.
+    </p>
+    <p>
+        ב<em>{{muniName()}}</em> מתגוררים <em>{{muniPop().toLocaleString()}}</em> תושבים.
+        @if (muniArea()) {
+            שטח הרשות הוא <em>{{muniArea().toFixed(1)}}</em> קמ״ר.
+        }
+    </p>
+    <p>
+        ל<em>{{muniName()}}</em> תקציב שנתי של <em>{{muniExpense() | number:'1.0-2'}}</em> מיליוני שקלים 
+        והיא נמצאת באשכול <em>{{muniSociEconomic()}}</em> במדד החברתי-כלכלי (10 הוא האשכול הכי גבוה).
+    </p>
+</section>
+
+<section *ngIf='reveal() >= 3'>
+    <p>בשביל להבין את מצבה של <em>{{muniName()}}</em>, נרצה להשוות אותה לרשויות דומות לה.</p>
+    <p>בדקנו וחקרנו מגוון של פרמטרים דמוגרפיים, גיאוגרפיים ופיננסיים ומצאנו את 5 הרשויות בישראל שהכי דומות לה:</p>
+    
+    <ol>
+    @for (similar of distances(); track similar.name) {
+        <li>
+            <em>{{similar.name}}</em> -<br/>
+            <small>
+                <mat-icon fontIcon="group"></mat-icon> <em>{{(similar.norm.POP * 1000).toLocaleString()}}</em> | 
+                <mat-icon fontIcon="payments"></mat-icon> <em>{{(similar.norm.EXPENSE / 1000).toFixed(0)}} מיל׳</em> | 
+                אשכול <em>{{similar.orig[HEADER_SOCIO_ECONOMIC]}}</em> | 
+                <em>{{similar.orig[HEADER_DISTRICT].replace('אזור יהודה והשומרון', 'יו״ש')}}</em>
+            </small>
+        </li>
+    }
+    </ol>
+</section>
+
+<section *ngIf='reveal() >= 4'>
+    <p>הרשויות האלה אמנם דומות ל<em>{{muniName()}}</em> אבל עדיין יש הבדלים, למשל:</p>
+    @for (similar of distances(); track similar.name) {
+        <p>ב<em>{{similar.name}}</em> יש {{similar.diff_text}}.</p>
+    }
+</section>
+
+<section *ngIf='reveal() >= 5'>
+    <p>עד כמה כל אחת מהרשויות האלה משקיעות בתושבים שלהן?<br/>נתחיל ב<em>חינוך</em>.</p>
+    @for (similar of distancesEducation(); track similar.name; let idx = $index) {
+        @if (idx === 0) {
+            <p><em>{{similar.name}}</em> משקיעה בחינוך סך של ₪{{similar.education  | number:'1.0-0' }} לתושב.
+        } @else {
+            <p><em>{{similar.name}}</em> - ₪{{similar.education  | number:'1.0-0' }} לתושב.</p>
+        }
+    }
+    <p>וכמה ב<em>{{muniName()}}</em>? ₪{{muniEducation() | number:'1.0-0' }} לתושב <mat-icon [fontIcon]='muniEducationMedal()'></mat-icon>.</p>
+</section>
+
+<section *ngIf='reveal() >= 6'>
+    <p>מה לגבי שירותי <em>רווחה</em>? מה המצב שם?</p>
+    @for (similar of distancesWelfare(); track similar.name; let idx = $index) {
+        @if (idx === 0) {
+            <p><em>{{similar.name}}</em> משקיעה בשירותי רווחה סך של ₪{{similar.welfare  | number:'1.0-0' }} לתושב.
+        } @else {
+            <p><em>{{similar.name}}</em> - ₪{{similar.welfare  | number:'1.0-0' }} לתושב.</p>
+        }
+    }
+    <p>וכמה ב<em>{{muniName()}}</em>? ₪{{muniWelfare() | number:'1.0-0' }} לתושב <mat-icon [fontIcon]='muniWelfareMedal()'></mat-icon>.</p>
+</section>
+
+<section *ngIf='reveal() >= 7'>
+    <p>אחרון חביב - פעילויות <em>תרבות</em>:</p>
+    @for (similar of distancesCulture(); track similar.name; let idx = $index) {
+        @if (idx === 0) {
+            <p><em>{{similar.name}}</em> משקיעה בפעולות תרבות סך של ₪{{similar.culture  | number:'1.0-0' }} לתושב.
+        } @else {
+            <p><em>{{similar.name}}</em> - ₪{{similar.culture  | number:'1.0-0' }} לתושב.</p>
+        }
+    }
+    <p>וכמה ב<em>{{muniName()}}</em>? ₪{{muniCulture() | number:'1.0-0' }} לתושב <mat-icon [fontIcon]='muniCultureMedal()'></mat-icon>.</p>
+</section>
+
+<section *ngIf='reveal() >= 8'>
+    <p>כמובן שזה לא כל הסיפור - גם הממשלה משחקת פה תפקיד משמעותי.</p>
+    <p>הממשלה תומכת כספית ברשויות במגוון תחומים - אבל יש לה כללים לפיהם היא קובעת כמה כסף היא מחלקת ולמי.</p>
+    <p>מצד שני, הרשויות צריכות לדעת לבקש את הכסף - ולפעמים גם להתאמץ בשביל לממש אותו.</p>
+    <p></p>
+    <p>בוא נראה כמה דוגמאות לתמיכות גדולות שהתקבלו במהלך הקדנציה האחרונה -</p>
+</section>
+
+<section *ngIf='reveal() >= 9'>
+    <p><em>{{distances()[0].name}}</em>, למשל, קיבלה 
+        ₪{{distances()[0].supports.supports[0].paid | number:'1.0-0'}} עבור <em>"{{distances()[0].supports.supports[0].name}}"</em>,
+        ₪{{distances()[0].supports.supports[1].paid | number:'1.0-0'}} עבור <em>"{{distances()[0].supports.supports[1].name}}"</em>,
+        ₪{{distances()[0].supports.supports[2].paid | number:'1.0-0'}} עבור <em>"{{distances()[0].supports.supports[2].name}}"</em>
+        ו-₪{{distances()[0].supports.supports[3].paid | number:'1.0-0'}} עבור <em>"{{distances()[0].supports.supports[3].name}}"</em>.
+    </p>
+    <p><em>{{distances()[1].name}}</em>, קיבלה 
+        ₪{{distances()[1].supports.supports[0].paid | number:'1.0-0'}} עבור <em>"{{distances()[1].supports.supports[0].name}}"</em>,
+        ₪{{distances()[1].supports.supports[1].paid | number:'1.0-0'}} עבור <em>"{{distances()[1].supports.supports[1].name}}"</em>,
+        ₪{{distances()[1].supports.supports[2].paid | number:'1.0-0'}} עבור <em>"{{distances()[1].supports.supports[2].name}}"</em>
+        ו-₪{{distances()[1].supports.supports[3].paid | number:'1.0-0'}} עבור <em>"{{distances()[1].supports.supports[3].name}}"</em>.
+    </p>
+</section>
+
+<section *ngIf='reveal() >= 10'>
+    <p>אז מה לגבי <em>{{muniName()}}</em>? אילו תמיכות גדולות היא קיבלה?</p>
+    <p>ה<em>נושאים</em> בהם התקבלו הכי הרבה תמיכות בקדנציה האחרונה היו:</p>
+    <ol>
+    @for (support of muni().supports.supports.slice(0, 7); track support.name) {
+        <li>
+            <em>{{support.name}}</em>:
+            ₪{{support.paid | number:'1.0-0'}}
+        </li>
+    }
+    </ol>
+</section>
+
+<section *ngIf='reveal() >= 11'>
+    <p>וספציפית ה<em>תמיכות</em> הכי גדולות היו:</p>
+    <ol>
+    @for (support of muni().supports.top.slice(0, 7); track support.title) {
+        <li>
+            <em>{{support.ministry}}</em>:  ₪{{support.paid | number:'1.0-0'}}<br/>
+            עבור <em>{{support.title}}</em>
+        </li>
+    }
+    </ol>
+</section>
+
+<section *ngIf='reveal() >= 12'>
+    <p>עוד חלק חשוב בסיפור קשור ל<em>עסקים</em>.</p>
+    <p>בקיצור ממש, רשויות מקומיות צריכות שטחי מסחר ותעשייה פעילים כדי להיות מאוזנות תקציבית.</p>
+    <p>אמנם לממשלה יש פה תפקיד - היא קובעת איפה יהיו איזורי תעשייה ולאיזו רשות הם יהיו שייכים - אבל גם לרשויות יש חלק משמעותי בשגשוג של העסקים בתחומה.</p>
+    <p></p>
+    <p>אז איך זה נראה במקרה שלנו?</p>
+</section>
+
+<section *ngIf='reveal() >= 13'>
+    <p></p>
+    @for (similar of distances(); track similar.name; let idx = $index) {
+        @if (idx === 0) {
+            <p>ל<em>{{similar.name}}</em> שטחי עסקים ומסחר על {{similar.businessArea | number:'1.0-0'}}% משטחה - ואלו מספקים {{similar.businessIncome | number:'1.0-0'}}% מההכנסות שלה מארנונה.</p>
+        } @else {
+            <p>אצל <em>{{similar.name}}</em> {{similar.businessArea | number:'1.0-0'}}% שטחים עסקיים המספקים {{similar.businessIncome | number:'1.0-0'}}% מההכנסות.</p>
+        }
+    }
+    <p>וכמה ב<em>{{muniName()}}</em>?
+    לה יש {{muniBusinessArea() | number:'1.0-0'}}% שטחים עסקיים המהווים {{muniBusinessIncome() | number:'1.0-0'}}% מההכנסות
+    <mat-icon [fontIcon]='muniBusinessMedal()'></mat-icon>.</p>    
+</section>
+
+<section *ngIf='reveal() >= 14'>
+    <p><em>זהו!</em> הבטחנו 5 דקות, לא?</p>
+    <p>כמובן שיש עוד הרבה לאן להעמיק, אבל נגמר פה המקום בדף...</p>
+    <p>אנחנו מקווים שהצלחנו להעשיר ולתת קצת חומר למחשבה לקראת הבחירות :-)</p>
+    <p>&nbsp;</p>
+    <small><em>האותיות הקטנות:</em></small>
+    <ul>
+        <li><small>המידע המוצג הוא העדכני ביותר הקיים בלמ״ס - לרוב זה אומר משנת 2021.</small></li>
+        <li><small>מידע נוסף התקבל מוועדת הבחירות המרכזית ומאתר התמיכות הממשלתיות.</small></li>
+        <li><small>פריטי המידע מנורמלים לפי גודל אוכלוסיה / שטח / תקציב שנתי איפה שרלוונטי ונחוץ.</small></li>
+    </ul>
+    <p>
+        <small>האתר פותח על ידי <a href='https://whiletrue.industries/about/adam-kariv/' target='_blank'>אדם קריב</a> מפרויקט <a href='https://next.obudget.org/' target='_blank'>"מפתח התקציב"</a>.</small><br/>
+        <small>אם נפלו טעויות אז סליחה (ובבקשה <a href='mailto:adam@obudget.org'>לספר לי!</a>).</small>    
+    </p>
+</section>
+
+<div class='continue' [class.visible]='canAdvance()' (click)='canAdvance() ? advance() : null'>
+    <mat-icon fontIcon='keyboard_double_arrow_down'></mat-icon><span> להתקדם... </span><mat-icon fontIcon='keyboard_double_arrow_down'></mat-icon>
+</div>
+}
