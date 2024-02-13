@@ -73,7 +73,7 @@ export class MainPageComponent {
   muniEducationMedal = computed(() => this.medal(this.muniEducation(), this.distancesEducation().map((m: any) => m.education)));
   muniWelfareMedal = computed(() => this.medal(this.muniWelfare(), this.distancesWelfare().map((m: any) => m.welfare)));
   muniCultureMedal = computed(() => this.medal(this.muniCulture(), this.distancesCulture().map((m: any) => m.culture)));
-  muniBusinessMedal = computed(() => this.medal(this.muniBusinessIncome(), this.distances().map((m: any) => m.businessIncome)));
+  muniBusinessMedal = computed(() => this.medal(this.muniBusinessIncome(), this.distancesBusiness().map((m: any) => m.businessIncome)));
 
   reveal = signal(0);
   canAdvance = signal(true);
@@ -113,6 +113,7 @@ export class MainPageComponent {
   distancesEducation = computed(() => this.distances().slice().sort((a: any, b: any) => b.education - a.education));
   distancesWelfare = computed(() => this.distances().slice().sort((a: any, b: any) => b.welfare - a.welfare));
   distancesCulture = computed(() => this.distances().slice().sort((a: any, b: any) => b.culture - a.culture));
+  distancesBusiness = computed(() => this.distances().slice().sort((a: any, b: any) => b.businessIncome - a.businessIncome));
   
   constructor(public data: DataService, private el: ElementRef) {
     effect(() => {
