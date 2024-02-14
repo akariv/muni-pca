@@ -85,19 +85,28 @@ export class MainPageComponent {
       muni.name = distance[0];
       muni.diff_text = distance[1].map((col: string) => {
         const norm = this.norm()[col].norm;
+        let annotations = this.norm()[col].annotations?.[0] || '';
+        console.log('annotations:', annotations);
+        if (annotations === '1') {
+          annotations = `<span title='יחסית לגודל האוכלוסיה ברשות'>&sup1;</span>`;
+        } else if (annotations === '2') {
+          annotations = `<span title='יחסית לתקציב השנתי של הרשות'>&sup2;</span>`;
+        } else if (annotations === '3') {
+          annotations = `<span title='יחסית לשטח השיפוט של הרשות'>&sup3;</span>`;
+        }
         const mine = this.muni().values[col] / (norm ? this.muni().norm[norm] : 1);
         const theirs = muni.values[col] / (norm ? muni.norm[norm] : 1);
         console.log('mine:', mine, 'theirs:', theirs);
         const options = {maximumFractionDigits: 1, minimumFractionDigits: 0};
         if (!!theirs && !!mine) {
           if (theirs > 2*mine) {
-            return `פי ${(theirs/mine).toLocaleString('he-IL', options)} יותר ${col}`;
+            return `פי ${(theirs/mine).toLocaleString('he-IL', options)} יותר ${col}${annotations}`;
           } else if (mine > 2*theirs) {
-            return `פי ${(mine/theirs).toLocaleString('he-IL', options)} פחות ${col}`;
+            return `פי ${(mine/theirs).toLocaleString('he-IL', options)} פחות ${col}${annotations}`;
           } else if (mine > theirs) {
-            return `כ-${(100 - 100*theirs/mine).toFixed(0)}% פחות ${col}`;
+            return `כ-${(100 - 100*theirs/mine).toFixed(0)}% פחות ${col}${annotations}`;
           } else if (theirs > mine) {
-            return `כ-${(100*theirs/mine - 100).toFixed(0)}% יותר ${col}`;
+            return `כ-${(100*theirs/mine - 100).toFixed(0)}% יותר ${col}${annotations}`;
           }
         }
         return null;
@@ -143,6 +152,7 @@ export class MainPageComponent {
   selected(event: MatAutocompleteSelectedEvent) {
     const value = event.option.value;
     this.selectCity(value);
+    this.reveal.set(1);
     this.advance();
   }
   
