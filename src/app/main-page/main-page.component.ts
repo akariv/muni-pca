@@ -7,8 +7,9 @@ import { MatIconModule } from '@angular/material/icon';
 import { FormControl, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatInputModule } from '@angular/material/input';
 import { AsyncPipe, CommonModule } from '@angular/common';
-import { Observable, map, startWith, timer } from 'rxjs';
+import { Observable, delay, map, startWith, switchMap, take, timer } from 'rxjs';
 import { BidiModule } from '@angular/cdk/bidi';
+import { ActivatedRoute, Router } from '@angular/router';
 
 @Component({
   selector: 'app-main-page',
@@ -124,13 +125,17 @@ export class MainPageComponent {
   distancesCulture = computed(() => this.distances().slice().sort((a: any, b: any) => b.culture - a.culture));
   distancesBusiness = computed(() => this.distances().slice().sort((a: any, b: any) => b.businessIncome - a.businessIncome));
   
-  constructor(public data: DataService, private el: ElementRef) {
-    effect(() => {
-      console.log('muni:', this.muni());
-      if (!this.muniName() && this.data.settlements().length) {
-        this.selectCity('רעננה');
+  constructor(public data: DataService, private el: ElementRef, private route: ActivatedRoute, private router: Router) {
+    this.data.ready.pipe(
+      delay(300),
+      switchMap(() => this.route.fragment),
+      take(1)
+    ).subscribe((fragment: string | null) => {
+      if (fragment) {
+        this.selectCity(fragment);
+        this.muniSelection.setValue(fragment);
       }
-    }, {allowSignalWrites: true});
+    });
   }
   
   ngOnInit() {
@@ -151,14 +156,16 @@ export class MainPageComponent {
 
   selected(event: MatAutocompleteSelectedEvent) {
     const value = event.option.value;
+    this.router.navigate([], {fragment: value});
     this.selectCity(value);
-    this.reveal.set(1);
-    this.advance();
   }
   
   selectCity(value: string) {
     this.cityName.set(value);
     this.muniName.set(this.data.settlements().find(option => option.name === value)?.muni || null);
+    console.log('selectCity:', value, this.muniName(), this.muni());
+    this.reveal.set(1);
+    this.advance();
   }
   
   medal(value: number, values: number[]) {

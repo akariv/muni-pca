@@ -119,7 +119,7 @@ all_city_names = [x['name'] for x in all_city_names]
 names = [x.replace("'", "''") for x in all_city_names]
 names = ','.join(f"'{x}'" for x in names)
 
-QUERY = f'select name, header, value from lamas_muni where name in ({names}) order by year'
+QUERY = f'select year, name, header, value from lamas_muni where name in ({names}) order by year'
 print(QUERY)
 
 DATA = DF.Flow(
@@ -127,6 +127,9 @@ DATA = DF.Flow(
     DF.filter_rows(lambda row: row['value'] is not None),
     DF.filter_rows(lambda row: (row['value'] and row['value'] != '0' or
                                 row['header'] not in ('הוצאות בתקציב הרגיל - סה"כ הוצאות בתקציב רגיל (אלפי ש"ח)', 'הכנסות בתקציב הרגיל - חיוב ארנונה סך הכל (שטח באלפי מ"ר)'))),
+    DF.filter_rows(lambda row: row['year'] != 2021 or row['name'] not in (
+        'בית שאן', 'נצרת', 'קריית שמונה', 'בוקעאתא', 'גן יבנה', 'חריש', 'משהד', 'קדימה-צורן', 'תל שבע'
+    )),
     DF.join_with_self('lamas_muni', ['name', 'header'], dict(
         name=None,
         header=None,
@@ -172,7 +175,7 @@ SETT_TO_MUNI = DF.Flow(
     }),
     DF.checkpoint('settlement_to_muni')
 ).results()[0][0]
-SETT_TO_MUNI = sorted(SETT_TO_MUNI, key=lambda x: x['name'])
+SETT_TO_MUNI = sorted(filter(lambda x: x['muni'] in all_city_names, SETT_TO_MUNI), key=lambda x: x['name'])
 
 
 # In[ ]:
