@@ -2,10 +2,10 @@
     <h1>תיכף בחירות!</h1>
     <p><small>(לרשויות המקומיות, כן?)</small></p>
     <p>אבל לא תמיד קל לדעת למי להצביע.</p> 
-    <p>לנהל עיר או מועצה זו משימה לא פשוטה ואפשר לעשות אותה טוב - וגם פחות טוב...
+    <p>לנהל עיר או מועצה זו משימה לא פשוטה ואפשר לעשות אותה טוב - וגם פחות טוב…
        האם מי שעכשיו בראש עושה עבודה טובה? או שאולי צריך לתת צ׳אנס למישהו אחר?
     </p>
-    <p>בחמש הדקות הקרובות ננסה לשפוך קצת אור על השאלה: <em>״איך העיר או המועצה שלי בהשוואה לאחרות?״</em></p>
+    <p>בחמש הדקות הקרובות ננסה לשפוך קצת אור על השאלה:<br/><em>״איך העיר או המועצה שלי בהשוואה לאחרות?״</em></p>
 </section>
 
 <section *ngIf='reveal() >= 1'>
@@ -13,7 +13,7 @@
     <mat-form-field class="example-full-width" [dir]='"rtl"'>
         <mat-label>בחירת ישוב מגורים</mat-label>
         <input type="text"
-               placeholder="בחרו אחד..."
+               placeholder="בחרו אחד…"
                aria-label="ישוב מגורים"
                matInput
                [formControl]="muniSelection"
@@ -196,7 +196,7 @@
 
 <section *ngIf='reveal() >= 14'>
     <p><em>זהו!</em> הבטחנו 5 דקות, לא?</p>
-    <p>כמובן שיש עוד הרבה לאן להעמיק, אבל נגמר פה המקום בדף...</p>
+    <p>כמובן שיש עוד הרבה לאן להעמיק, אבל נגמר פה המקום בדף…</p>
     <p>אנחנו מקווים שהצלחנו להעשיר ולתת קצת חומר למחשבה לקראת הבחירות :-)</p>
     <p></p>
     <p>&nbsp;</p>
@@ -213,5 +213,5 @@
 </section>
 }
 <div class='continue' [class.visible]='canAdvance()' (click)='canAdvance() ? advance() : null'>
-    <mat-icon fontIcon='keyboard_double_arrow_down'></mat-icon><span> להתקדם... </span><mat-icon fontIcon='keyboard_double_arrow_down'></mat-icon>
+    <mat-icon fontIcon='keyboard_double_arrow_down'></mat-icon><span> להתקדם… </span><mat-icon fontIcon='keyboard_double_arrow_down'></mat-icon>
 </div>
