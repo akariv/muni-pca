@@ -134,7 +134,7 @@ export class MainPageComponent {
       take(1)
     ).subscribe((fragment: string | null) => {
       if (fragment) {
-        this.selectCity(fragment);
+        this.selectCity(fragment, false);
         this.muniSelection.setValue(fragment);
       }
     });
@@ -167,12 +167,12 @@ export class MainPageComponent {
     });
   }
   
-  selectCity(value: string) {
+  selectCity(value: string, scroll=true) {
     this.cityName.set(value);
     this.muniName.set(this.data.settlements().find(option => option.name === value)?.muni || null);
     console.log('selectCity:', value, this.muniName(), this.muni());
     this.reveal.set(1);
-    this.advance();
+    this.advance(scroll);
   }
   
   medal(value: number, values: number[]) {
@@ -188,14 +188,16 @@ export class MainPageComponent {
     return 'sentiment_dissatisfied';
   }
 
-  advance() {
+  advance(scroll=true) {
     this.canAdvance.set(false);
     this.reveal.set(this.reveal() + 1);
-    timer(0).subscribe(() => {
-      const sections = this.el.nativeElement.querySelectorAll('section');
-      const lastSection: HTMLElement = sections[sections.length - 1];
-      lastSection.scrollIntoView({behavior: 'smooth', block: 'start'});
-    });
+    if (scroll) {
+      timer(0).subscribe(() => {
+        const sections = this.el.nativeElement.querySelectorAll('section');
+        const lastSection: HTMLElement = sections[sections.length - 1];
+        lastSection.scrollIntoView({behavior: 'smooth', block: 'start'});
+      });  
+    }
     timer(1000).subscribe(() => this.canAdvance.set(this.reveal() !== 1 && this.reveal() !== 14));
   }
 }
