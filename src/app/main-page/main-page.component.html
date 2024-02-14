@@ -2,8 +2,10 @@
     <h1>תיכף בחירות!</h1>
     <p><small>(לרשויות המקומיות, כן?)</small></p>
     <p>אבל לא תמיד קל לדעת למי להצביע.</p> 
-    <p>לא פעם אנחנו שואלים את עצמנו ״איך העיר או המועצה שלי בהשוואה לאחרות?״</p> 
-    <p>בחמש הדקות הקרובות ננסה לשפוך אור על השאלה הזו.</p> 
+    <p>לנהל עיר או מועצה זו משימה לא פשוטה ואפשר לעשות אותה טוב - וגם פחות טוב...
+       האם מי שעכשיו בראש עושה עבודה טובה? או שאולי צריך לתת צ׳אנס למישהו אחר?
+    </p>
+    <p>בחמש הדקות הקרובות ננסה לשפוך קצת אור על השאלה: <em>״איך העיר או המועצה שלי בהשוואה לאחרות?״</em></p>
 </section>
 
 <section *ngIf='reveal() >= 1'>
@@ -15,7 +17,9 @@
                aria-label="ישוב מגורים"
                matInput
                [formControl]="muniSelection"
-               [matAutocomplete]="auto">
+               [matAutocomplete]="auto"
+               #input
+        >
         <mat-autocomplete #auto="matAutocomplete" (optionSelected)='selected($event)'>
           @for (option of filteredOptions | async; track option) {
             <mat-option [value]="option">{{option}}</mat-option>
@@ -71,10 +75,15 @@
 </section>
 
 <section *ngIf='reveal() >= 4'>
-    <p>הרשויות האלה אמנם דומות ל<em>{{muniName()}}</em> אבל עדיין יש הבדלים, למשל:</p>
+    <p>הרשויות האלה אמנם דומות ל<em>{{muniName()}}</em> אבל הן עדיין שונות<br/>כמה הבדלים בולטים לדוגמא:</p>
     @for (similar of distances(); track similar.name) {
         <p>ב<em>{{similar.name}}</em> יש <span [innerHTML]='similar.diff_text'></span>.</p>
     }
+    <p>
+        <small>¹ יחסית לגודל האוכלוסיה ברשות</small><br/>
+        <small>² יחסית לתקציב השנתי הרשות</small><br/>
+        <small>³ יחסית לשטח השיפוט של הרשות</small>
+    </p>
 </section>
 
 <section *ngIf='reveal() >= 5'>
@@ -123,16 +132,16 @@
 
 <section *ngIf='reveal() >= 9'>
     <p><em>{{distances()[0].name}}</em>, למשל, קיבלה 
-        ₪{{distances()[0].supports.supports[0].paid | number:'1.0-0'}} עבור <em>"{{distances()[0].supports.supports[0].name}}"</em>,
-        ₪{{distances()[0].supports.supports[1].paid | number:'1.0-0'}} עבור <em>"{{distances()[0].supports.supports[1].name}}"</em>,
-        ₪{{distances()[0].supports.supports[2].paid | number:'1.0-0'}} עבור <em>"{{distances()[0].supports.supports[2].name}}"</em>
-        ו-₪{{distances()[0].supports.supports[3].paid | number:'1.0-0'}} עבור <em>"{{distances()[0].supports.supports[3].name}}"</em>.
+        {{distances()[0].supports.supports[0].paid / 1000000 | number:'1.0-1'}} מיליון ₪ עבור <em>"{{distances()[0].supports.supports[0].name}}"</em>,<br/>
+        {{distances()[0].supports.supports[1].paid / 1000000 | number:'1.0-1'}} מיליון ₪ עבור <em>"{{distances()[0].supports.supports[1].name}}"</em>,<br/>
+        {{distances()[0].supports.supports[2].paid / 1000000 | number:'1.0-1'}} מיליון ₪ עבור <em>"{{distances()[0].supports.supports[2].name}}"</em><br/>
+        ו-{{distances()[0].supports.supports[3].paid  / 1000000 | number:'1.0-1'}} מיליון ₪ עבור <em>"{{distances()[0].supports.supports[3].name}}"</em>.
     </p>
     <p><em>{{distances()[1].name}}</em>, קיבלה 
-        ₪{{distances()[1].supports.supports[0].paid | number:'1.0-0'}} עבור <em>"{{distances()[1].supports.supports[0].name}}"</em>,
-        ₪{{distances()[1].supports.supports[1].paid | number:'1.0-0'}} עבור <em>"{{distances()[1].supports.supports[1].name}}"</em>,
-        ₪{{distances()[1].supports.supports[2].paid | number:'1.0-0'}} עבור <em>"{{distances()[1].supports.supports[2].name}}"</em>
-        ו-₪{{distances()[1].supports.supports[3].paid | number:'1.0-0'}} עבור <em>"{{distances()[1].supports.supports[3].name}}"</em>.
+        ₪{{distances()[1].supports.supports[0].paid / 1000000 | number:'1.0-1'}} מיליון ₪ עבור <em>"{{distances()[1].supports.supports[0].name}}"</em>,<br/>
+        ₪{{distances()[1].supports.supports[1].paid / 1000000 | number:'1.0-1'}} מיליון ₪ עבור <em>"{{distances()[1].supports.supports[1].name}}"</em>,<br/>
+        ₪{{distances()[1].supports.supports[2].paid  / 1000000 | number:'1.0-1'}} מיליון ₪ עבור <em>"{{distances()[1].supports.supports[2].name}}"</em><br/>
+        ו-₪{{distances()[1].supports.supports[3].paid  / 1000000 | number:'1.0-1'}} מיליון ₪ עבור <em>"{{distances()[1].supports.supports[3].name}}"</em>.
     </p>
 </section>
 
@@ -143,7 +152,7 @@
     @for (support of muni().supports.supports.slice(0, 7); track support.name) {
         <li>
             <em>{{support.name}}</em>:
-            ₪{{support.paid | number:'1.0-0'}}
+            {{support.paid / 1000000 | number:'1.0-1'}} מיליון ₪
         </li>
     }
     </ol>
@@ -154,11 +163,13 @@
     <ol>
     @for (support of muni().supports.top.slice(0, 7); track support.title) {
         <li>
-            <em>{{support.ministry}}</em>:  ₪{{support.paid | number:'1.0-0'}}<br/>
+            <em>{{support.ministry}}</em>:  {{support.paid / 1000000 | number:'1.0-0'}} מיליון ₪<br/>
             עבור <em>{{support.title}}</em>
         </li>
     }
     </ol>
+    <p></p>
+    <p>דרך אגב, אפשר למצוא עוד הרבה מידע על {{muniName()}}, כולל כל התמיכות שהיא קיבלה, באתר <a [href]='"https://next.obudget.org/i/org/municipality/" + muni().orig.entity_id' target='_blank'>מפתח התקציב</a>!</p>
 </section>
 
 <section *ngIf='reveal() >= 12'>
@@ -187,6 +198,7 @@
     <p><em>זהו!</em> הבטחנו 5 דקות, לא?</p>
     <p>כמובן שיש עוד הרבה לאן להעמיק, אבל נגמר פה המקום בדף...</p>
     <p>אנחנו מקווים שהצלחנו להעשיר ולתת קצת חומר למחשבה לקראת הבחירות :-)</p>
+    <p></p>
     <p>&nbsp;</p>
     <small><em>האותיות הקטנות:</em></small>
     <ul>

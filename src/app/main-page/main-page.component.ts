@@ -1,4 +1,4 @@
-import { Component, ElementRef, computed, effect, signal } from '@angular/core';
+import { Component, ElementRef, ViewChild, computed, effect, signal } from '@angular/core';
 import { DataService, MuniMapping } from '../data.service';
 
 import { MatAutocompleteModule, MatAutocompleteSelectedEvent } from '@angular/material/autocomplete';
@@ -125,6 +125,8 @@ export class MainPageComponent {
   distancesCulture = computed(() => this.distances().slice().sort((a: any, b: any) => b.culture - a.culture));
   distancesBusiness = computed(() => this.distances().slice().sort((a: any, b: any) => b.businessIncome - a.businessIncome));
   
+  @ViewChild('input', {static: false}) input: ElementRef;
+
   constructor(public data: DataService, private el: ElementRef, private route: ActivatedRoute, private router: Router) {
     this.data.ready.pipe(
       delay(300),
@@ -158,6 +160,11 @@ export class MainPageComponent {
     const value = event.option.value;
     this.router.navigate([], {fragment: value});
     this.selectCity(value);
+    timer(100).subscribe(() => {
+      this.el.nativeElement.querySelectorAll('input').forEach((element: HTMLElement) => {
+        element.blur();
+      });  
+    });
   }
   
   selectCity(value: string) {
