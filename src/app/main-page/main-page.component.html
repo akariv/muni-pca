@@ -75,7 +75,7 @@
 </section>
 
 <section *ngIf='reveal() >= 4'>
-    <p>הרשויות האלה אמנם דומות ל<em>{{muniName()}}</em> אבל הן עדיין שונות<br/>כמה הבדלים בולטים לדוגמא:</p>
+    <p>הרשויות האלה אמנם דומות ל<em>{{muniName()}}</em> אבל הן עדיין שונות…<br/>כמה הבדלים בולטים לדוגמא:</p>
     @for (similar of distances(); track similar.name) {
         <p>ב<em>{{similar.name}}</em> יש <span [innerHTML]='similar.diff_text'></span>.</p>
     }
