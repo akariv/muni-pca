@@ -38,7 +38,17 @@ export class MainPageComponent {
   HEADER_BUSINESS_RESIDENTIAL_INCOME = 'הכנסות בתקציב הרגיל - ארנונה למגורים (גבייה) (אלפי ש"ח)';
   HEADER_BUSINESS_COMMERCIAL_INCOME = 'הכנסות בתקציב הרגיל - ארנונה לא למגורים (גבייה) (אלפי ש"ח)';
   HEADER_BUSINESS_TOTAL_AREA = 'הכנסות בתקציב הרגיל - חיוב ארנונה סך הכל (שטח באלפי מ"ר)';
-  HEADER_BUSINESS_RESIDENTIAL_AREA = 'הכנסות בתקציב הרגיל - חיוב ארנונה למגורים (שטח באלפי מ"ר)';
+  HEADERS_BUSINESS_COMMERCIAL_AREA = [
+    'הכנסות בתקציב הרגיל - חיוב ארנונה למשרדים, שירותים ומסחר (שטח באלפי מ"ר)',
+    'הכנסות בתקציב הרגיל - חיוב ארנונה לתעשייה (שטח באלפי מ"ר)',
+    'הכנסות בתקציב הרגיל - חיוב ארנונה למלאכה (שטח באלפי מ"ר)',
+    'הכנסות בתקציב הרגיל - חיוב ארנונה לבנקים וחברות ביטוח (שטח באלפי מ"ר)',
+    'הכנסות בתקציב הרגיל - חיוב ארנונה לבתי מלון (שטח באלפי מ"ר)',
+    'הכנסות בתקציב הרגיל - חיוב ארנונה לחניונים (שטח באלפי מ"ר)',
+  ];
+  HEADERS_BUSINESS_IGNORE = [
+    'הכנסות בתקציב הרגיל - חיוב ארנונה לקרקע תפוסה (שטח באלפי מ"ר)',
+  ];
 
   HEADER_EXPENSE_EDUCATION = 'הוצאה לנפש על חינוך';
   HEADER_EXPENSE_WELFARE = 'הוצאה לנפש על רווחה';
@@ -68,8 +78,7 @@ export class MainPageComponent {
   muniCulture = computed(() => (this.muni().values[this.HEADER_EXPENSE_CULTURE] / this.muni().norm.POP));
 
   muniBusinessIncome = computed(() => 100 * this.muni().orig[this.HEADER_BUSINESS_COMMERCIAL_INCOME] / (this.muni().orig[this.HEADER_BUSINESS_RESIDENTIAL_INCOME] + this.muni().orig[this.HEADER_BUSINESS_COMMERCIAL_INCOME]));
-  muniBusinessArea = computed(() => 100 - 100 * this.muni().orig[this.HEADER_BUSINESS_RESIDENTIAL_AREA] / this.muni().orig[this.HEADER_BUSINESS_TOTAL_AREA]);
-
+  muniBusinessArea = computed(() => this.calcBusinessArea(this.muni()));
 
   muniEducationMedal = computed(() => this.medal(this.muniEducation(), this.distancesEducation().map((m: any) => m.education)));
   muniWelfareMedal = computed(() => this.medal(this.muniWelfare(), this.distancesWelfare().map((m: any) => m.welfare)));
@@ -116,7 +125,7 @@ export class MainPageComponent {
       muni.welfare = (muni.values[this.HEADER_EXPENSE_WELFARE] / this.muni().norm.POP);
       muni.culture = (muni.values[this.HEADER_EXPENSE_CULTURE] / this.muni().norm.POP);
       muni.businessIncome = 100 * muni.orig[this.HEADER_BUSINESS_COMMERCIAL_INCOME] / (muni.orig[this.HEADER_BUSINESS_RESIDENTIAL_INCOME] + muni.orig[this.HEADER_BUSINESS_COMMERCIAL_INCOME]);
-      muni.businessArea = 100 - 100 * muni.orig[this.HEADER_BUSINESS_RESIDENTIAL_AREA] / muni.orig[this.HEADER_BUSINESS_TOTAL_AREA];
+      muni.businessArea = this.calcBusinessArea(muni);
       return muni;
     });
   });
@@ -199,5 +208,11 @@ export class MainPageComponent {
       });  
     }
     timer(1000).subscribe(() => this.canAdvance.set(this.reveal() !== 1 && this.reveal() !== 14));
+  }
+
+  calcBusinessArea(muni: any) {
+    const sumCommercial = this.HEADERS_BUSINESS_COMMERCIAL_AREA.map(h => muni.orig[h] || 0).reduce((a, b) => a + b, 0);
+    const sumTotal = muni.orig[this.HEADER_BUSINESS_TOTAL_AREA] - (this.HEADERS_BUSINESS_IGNORE.map(h => muni.orig[h] || 0).reduce((a, b) => a + b, 0));
+    return 100 * sumCommercial / sumTotal;
   }
 }
