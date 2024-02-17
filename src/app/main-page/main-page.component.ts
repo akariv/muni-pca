@@ -121,9 +121,9 @@ export class MainPageComponent {
         }
         return null;
       }).slice(0, 2).filter((x: any) => !!x).join(' ו');
-      muni.education = (muni.values[this.HEADER_EXPENSE_EDUCATION] / this.muni().norm.POP);
-      muni.welfare = (muni.values[this.HEADER_EXPENSE_WELFARE] / this.muni().norm.POP);
-      muni.culture = (muni.values[this.HEADER_EXPENSE_CULTURE] / this.muni().norm.POP);
+      muni.education = (muni.values[this.HEADER_EXPENSE_EDUCATION] / muni.norm.POP);
+      muni.welfare = (muni.values[this.HEADER_EXPENSE_WELFARE] / muni.norm.POP);
+      muni.culture = (muni.values[this.HEADER_EXPENSE_CULTURE] / muni.norm.POP);
       muni.businessIncome = 100 * muni.orig[this.HEADER_BUSINESS_COMMERCIAL_INCOME] / (muni.orig[this.HEADER_BUSINESS_RESIDENTIAL_INCOME] + muni.orig[this.HEADER_BUSINESS_COMMERCIAL_INCOME]);
       muni.businessArea = this.calcBusinessArea(muni);
       return muni;
