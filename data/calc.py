@@ -108,8 +108,6 @@ for entity_id in ENTITIES.values():
         'usage': usage,
     }
 
-print(ENTITY_SUPPORTS['500287008'])
-
 NAMES_QUERY = 'select distinct name from lamas_muni where year=2021'
 all_city_names = DF.Flow(
     DF.load(DB, query=NAMES_QUERY, name='names'),
@@ -199,9 +197,11 @@ for row in DATA:
                 name = None
                 pass
     if value is not None:
+        if header == 'דמוגרפיה - שיעור פטירות תינוקות ל-1,000 לידות חי (אחוז)':
+            value = abs(value)
         clean.append(dict(
             name=row['name'],
-            header=row['header'],
+            header=header,
             value=value
         ))
 
@@ -218,6 +218,7 @@ df = pd.DataFrame(clean)
 
 # Pivot the data to get cities as rows and indicators as columns
 pivoted_df = df.pivot(index='name', columns='header', values='value')
+
 voter_columns = [ 'מצביעים למפלגות חרדיות', 'מצביעי שמאל', 'מצביעי ימין', 'מצביעי מרכז', 'מצביעים למפלגות ערביות']
 for col in voter_columns:
     pivoted_df[col] = VOTERS[col]
