@@ -50,7 +50,7 @@ export class MainPageComponent {
     'הכנסות בתקציב הרגיל - חיוב ארנונה לקרקע תפוסה (שטח באלפי מ"ר)',
   ];
 
-  HEADER_EXPENSE_EDUCATION = 'הוצאה לנפש על חינוך';
+  HEADER_EXPENSE_EDUCATION = 'הוצאה לתלמיד על חינוך';
   HEADER_EXPENSE_WELFARE = 'הוצאה לנפש על רווחה';
   HEADER_EXPENSE_CULTURE = 'הוצאה לנפש על תרבות';
 
@@ -73,7 +73,7 @@ export class MainPageComponent {
   muniPop = computed(() => this.muni().norm.POP * 1000);
   muniNumCities = computed(() => this.muni().orig[this.HEADER_CITY_COUNT]);
 
-  muniEducation = computed(() => (this.muni().values[this.HEADER_EXPENSE_EDUCATION] / this.muni().norm.POP));
+  muniEducation = computed(() => (this.muni().values[this.HEADER_EXPENSE_EDUCATION] / this.muni().norm.STUDENTS));
   muniWelfare = computed(() => (this.muni().values[this.HEADER_EXPENSE_WELFARE] / this.muni().norm.POP));
   muniCulture = computed(() => (this.muni().values[this.HEADER_EXPENSE_CULTURE] / this.muni().norm.POP));
 
@@ -121,7 +121,7 @@ export class MainPageComponent {
         }
         return null;
       }).slice(0, 2).filter((x: any) => !!x).join(' ו');
-      muni.education = (muni.values[this.HEADER_EXPENSE_EDUCATION] / muni.norm.POP);
+      muni.education = (muni.values[this.HEADER_EXPENSE_EDUCATION] / muni.norm.STUDENTS);
       muni.welfare = (muni.values[this.HEADER_EXPENSE_WELFARE] / muni.norm.POP);
       muni.culture = (muni.values[this.HEADER_EXPENSE_CULTURE] / muni.norm.POP);
       muni.businessIncome = 100 * muni.orig[this.HEADER_BUSINESS_COMMERCIAL_INCOME] / (muni.orig[this.HEADER_BUSINESS_RESIDENTIAL_INCOME] + muni.orig[this.HEADER_BUSINESS_COMMERCIAL_INCOME]);
@@ -187,12 +187,8 @@ export class MainPageComponent {
   medal(value: number, values: number[]) {
     if (value > values[0]) {
       return 'workspace_premium';
-    } else if (value > values[1]) {
+    } else if (value > (values[0] + values[4]) / 2) {
       return 'sentiment_very_satisfied';
-    } else if (value > values[2]) {
-      return 'sentiment_satisfied';
-    } else if (value > values[3]) {
-      return 'sentiment_neutral';
     }
     return 'sentiment_dissatisfied';
   }

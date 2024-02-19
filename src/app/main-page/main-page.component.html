@@ -75,7 +75,7 @@
 <section *ngIf='reveal() >= 4'>
     <p>הרשויות האלה אמנם דומות ל<em>{{muniName()}}</em> אבל הן עדיין שונות…<br/>כמה הבדלים בולטים לדוגמא:</p>
     @for (similar of distances(); track similar.name) {
-        <p>ב<em>{{similar.name}}</em> יש <span [innerHTML]='similar.diff_text'></span>.</p>
+        <p *ngIf='similar.diff_text'>ב<em>{{similar.name}}</em> יש <span [innerHTML]='similar.diff_text'></span>.</p>
     }
     <p>
         <small>¹ יחסית לגודל האוכלוסיה ברשות</small><br/>
@@ -88,12 +88,15 @@
     <p>עד כמה כל אחת מהרשויות האלה משקיעות בתושבים שלהן?<br/>נתחיל ב<em>חינוך</em>.</p>
     @for (similar of distancesEducation(); track similar.name; let idx = $index) {
         @if (idx === 0) {
-            <p><em>{{similar.name}}</em> משקיעה בחינוך סך של ₪{{similar.education  | number:'1.0-0' }} לתושב.
+            <p><em>{{similar.name}}</em> משקיעה בחינוך סך של ₪{{similar.education  | number:'1.0-0' }} לכל ילד.
         } @else {
-            <p><em>{{similar.name}}</em> - ₪{{similar.education  | number:'1.0-0' }} לתושב.</p>
+            <p><em>{{similar.name}}</em> - ₪{{similar.education  | number:'1.0-0' }} לילד.</p>
         }
     }
-    <p>וכמה ב<em>{{muniName()}}</em>? ₪{{muniEducation() | number:'1.0-0' }} לתושב <mat-icon [fontIcon]='muniEducationMedal()'></mat-icon>.</p>
+    <p>וכמה ב<em>{{muniName()}}</em>? ₪{{muniEducation() | number:'1.0-0' }} לילד <mat-icon [fontIcon]='muniEducationMedal()'></mat-icon>.</p>
+    <p>
+        <small>(בחישוב הזה ילד הוא כל צעיר מתחת לגיל 18 ברשות)</small>
+    </p>
 </section>
 
 <section *ngIf='reveal() >= 6'>
