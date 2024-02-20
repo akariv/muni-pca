@@ -85,7 +85,9 @@
 </section>
 
 <section *ngIf='reveal() >= 5'>
-    <p>עד כמה כל אחת מהרשויות האלה משקיעות בתושבים שלהן?<br/>נתחיל ב<em>חינוך</em>.</p>
+    <p>עד כמה כל אחת מהרשויות האלה משקיעות בתושבים שלהן?<br/>נתחיל ב<em>חינוך</em>.<br/>
+        <small>(שימו לב - נתוני התקציב באתר מעודכנים לשנת 2021)</small>
+    </p>
     @for (similar of distancesEducation(); track similar.name; let idx = $index) {
         @if (idx === 0) {
             <p><em>{{similar.name}}</em> משקיעה בחינוך סך של ₪{{similar.education  | number:'1.0-0' }} לכל ילד.
