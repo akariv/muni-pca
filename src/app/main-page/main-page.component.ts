@@ -109,13 +109,13 @@ export class MainPageComponent {
         console.log('mine:', mine, 'theirs:', theirs);
         const options = {maximumFractionDigits: 1, minimumFractionDigits: 0};
         if (!!theirs && !!mine) {
-          if (theirs > 2*mine) {
+          if (theirs > 2*mine && theirs < 20*mine) {
             return `פי ${(theirs/mine).toLocaleString('he-IL', options)} יותר ${col}${annotations}`;
-          } else if (mine > 2*theirs) {
+          } else if (mine > 2*theirs && mine < 20*theirs) {
             return `פי ${(mine/theirs).toLocaleString('he-IL', options)} פחות ${col}${annotations}`;
-          } else if (mine > theirs) {
+          } else if (mine > theirs && mine <= 2*theirs) {
             return `כ-${(100 - 100*theirs/mine).toFixed(0)}% פחות ${col}${annotations}`;
-          } else if (theirs > mine) {
+          } else if (theirs > mine && theirs <= 2*mine) {
             return `כ-${(100*theirs/mine - 100).toFixed(0)}% יותר ${col}${annotations}`;
           }
         }
